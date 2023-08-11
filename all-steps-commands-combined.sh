@@ -73,6 +73,8 @@ az group create -n rg-enterprise-networking-hubs -l centralus
 # [This takes less than one minute to run.]
 az group create -n rg-enterprise-networking-spokes -l centralus
 
+az deployment group create -g rg-enterprise-networking-hubs -f networking/hub-default.bicep -p location=eastus2
+
 RESOURCEID_VNET_HUB=$(az deployment group show -g rg-enterprise-networking-hubs -n hub-default --query properties.outputs.hubVnetId.value -o tsv)
 echo RESOURCEID_VNET_HUB: $RESOURCEID_VNET_HUB
 
@@ -103,8 +105,10 @@ echo ACR_NAME_AKS_BASELINE: $ACR_NAME_AKS_BASELINE
 # Import core image(s) hosted in public container registries to be used during bootstrapping
 az acr import --source ghcr.io/kubereboot/kured:1.12.0 -n $ACR_NAME_AKS_BASELINE
 
+# Non-MacOs compatible command
 sed -i "s:ghcr.io:${ACR_NAME_AKS_BASELINE}.azurecr.io:" ./cluster-manifests/cluster-baseline-settings/kured.yaml
 
+# On MacOs, run this command instead
 sed -i '' 's:ghcr.io:'"${ACR_NAME_AKS_BASELINE}"'.azurecr.io:g' ./cluster-manifests/cluster-baseline-settings/kured.yaml
 
 git commit -a -m "Update image source to use my ACR instance instead of a public container registry."
