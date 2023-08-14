@@ -8,15 +8,23 @@ az feature list -o table --query "[?name=='Microsoft.ContainerService/EnableWork
 # When all say "Registered" then re-register the AKS resource provider
 az provider register --namespace Microsoft.ContainerService
 
-git clone https://github.com/mspnp/aks-baseline.git
-cd aks-baseline
+# git clone https://github.com/mspnp/aks-baseline.git
+# cd aks-baseline
 
 # 02 - Generate your client-facing and AKS ingress controller TLS certificates
 
-export DOMAIN_NAME_AKS_BASELINE="in-azure.com"
+export DOMAIN_NAME_AKS_BASELINE="azcloudjedi.com"
 
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.${DOMAIN_NAME_AKS_BASELINE}/O=Contoso Bicycle" -addext "subjectAltName = DNS:bicycle.${DOMAIN_NAME_AKS_BASELINE}" -addext "keyUsage = digitalSignature" -addext "extendedKeyUsage = serverAuth"
-openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
+# run either option 1 or 2, but must run at least one of the options to create the PFX/CRT files for Application Gateway
+
+# Option 1
+# if you wish to create a self-signed certificat, use the following two commands to create a PFX and CRT files
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -out appgw.crt -keyout appgw.key -subj "/CN=bicycle.${DOMAIN_NAME_AKS_BASELINE}/O=Contoso Bicycle" -addext "subjectAltName = DNS:bicycle.${DOMAIN_NAME_AKS_BASELINE}" -addext "keyUsage = digitalSignature" -addext "extendedKeyUsage = serverAuth"
+# openssl pkcs12 -export -out appgw.pfx -in appgw.crt -inkey appgw.key -passout pass:
+
+# Option 2
+# if you wish to bring in your certificate PFX file, then use the following line to create the public CRT certificate file
+# openssl pkcs12 -in appgw.pfx -clcerts -nokeys -out appgw.crt
 
 export APP_GATEWAY_LISTENER_CERTIFICATE_AKS_BASELINE=$(cat appgw.pfx | base64 | tr -d '\n')
 echo APP_GATEWAY_LISTENER_CERTIFICATE_AKS_BASELINE: $APP_GATEWAY_LISTENER_CERTIFICATE_AKS_BASELINE
@@ -37,7 +45,7 @@ echo AKS_INGRESS_CONTROLLER_CERTIFICATE_BASE64_AKS_BASELINE: $AKS_INGRESS_CONTRO
 export TENANTID_AZURERBAC_AKS_BASELINE=$(az account show --query tenantId -o tsv)
 echo TENANTID_AZURERBAC_AKS_BASELINE: $TENANTID_AZURERBAC_AKS_BASELINE
 
-az login -t <Replace-With-ClusterApi-AzureAD-TenantId> --allow-no-subscriptions
+az login -t $TENANTID_AZURERBAC_AKS_BASELINE --allow-no-subscriptions
 export TENANTID_K8SRBAC_AKS_BASELINE=$(az account show --query tenantId -o tsv)
 echo TENANTID_K8SRBAC_AKS_BASELINE: $TENANTID_K8SRBAC_AKS_BASELINE
 
@@ -64,8 +72,6 @@ echo AADOBJECTID_GROUP_A0008_READER_AKS_BASELINE: $AADOBJECTID_GROUP_A0008_READE
 # source aks_baseline.env
 
 # 04 - Deploy the hub-spoke network topology
-
-az login -t $TENANTID_AZURERBAC_AKS_BASELINE
 
 # [This takes less than one minute to run.]
 az group create -n rg-enterprise-networking-hubs -l centralus

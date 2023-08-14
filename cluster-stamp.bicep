@@ -43,7 +43,7 @@ param clusterAuthorizedIPRanges array = []
   'southeastasia'
 ])
 param location string = 'eastus2'
-param kubernetesVersion string = '1.26.0'
+param kubernetesVersion string = '1.26'
 
 @description('Domain name to use for App Gateway and AKS ingress.')
 param domainName string = 'contoso.com'
@@ -1670,8 +1670,8 @@ resource mc 'Microsoft.ContainerService/managedClusters@2023-02-02-preview' = {
       {
         name: 'npsystem'
         count: 3
-        vmSize: 'Standard_DS2_v2'
-        osDiskSizeGB: 80
+        vmSize: 'standard_b16als_v2'
+        osDiskSizeGB: 60
         osDiskType: 'Ephemeral'
         osType: 'Linux'
         osSKU: 'Ubuntu'
@@ -1704,8 +1704,8 @@ resource mc 'Microsoft.ContainerService/managedClusters@2023-02-02-preview' = {
       {
         name: 'npuser01'
         count: 2
-        vmSize: 'Standard_DS3_v2'
-        osDiskSizeGB: 120
+        vmSize: 'standard_b16als_v2'
+        osDiskSizeGB: 60
         osDiskType: 'Ephemeral'
         osType: 'Linux'
         osSKU: 'Ubuntu'
