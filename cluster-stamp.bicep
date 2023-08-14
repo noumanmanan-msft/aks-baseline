@@ -1671,8 +1671,8 @@ resource mc 'Microsoft.ContainerService/managedClusters@2023-02-02-preview' = {
         name: 'npsystem'
         count: 3
         vmSize: 'standard_b16als_v2'
-        osDiskSizeGB: 60
-        osDiskType: 'Ephemeral'
+        osDiskSizeGB: 80
+        osDiskType: 'StandardSSD_LRS'
         osType: 'Linux'
         osSKU: 'Ubuntu'
         minCount: 3
@@ -1705,8 +1705,8 @@ resource mc 'Microsoft.ContainerService/managedClusters@2023-02-02-preview' = {
         name: 'npuser01'
         count: 2
         vmSize: 'standard_b16als_v2'
-        osDiskSizeGB: 60
-        osDiskType: 'Ephemeral'
+        osDiskSizeGB: 120
+        osDiskType: 'StandardSSD_LRS'
         osType: 'Linux'
         osSKU: 'Ubuntu'
         minCount: 2
