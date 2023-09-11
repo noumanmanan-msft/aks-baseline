@@ -1,4 +1,4 @@
-# 01 - Prerequisites
+# 01 - Prerequisites - Run the following command only once
 az feature register --namespace "Microsoft.ContainerService" -n "EnableWorkloadIdentityPreview"
 az feature register --namespace "Microsoft.ContainerService" -n "EnableImageCleanerPreview"
 
@@ -162,8 +162,8 @@ echo TEMP_ROLEASSIGNMENT_TO_UPLOAD_CERT: $TEMP_ROLEASSIGNMENT_TO_UPLOAD_CERT
 # If you are behind a proxy or some other egress that does not provide a consistent IP, you'll need to manually adjust the
 # Azure Key Vault firewall to allow this traffic.
 CURRENT_IP_ADDRESS=$(curl -s -4 https://ifconfig.io)
-echo CURRENT_IP_ADDRESS: $CURRENT_IP_ADDRESS
-az keyvault network-rule add -n $KEYVAULT_NAME_AKS_BASELINE --ip-address ${CURRENT_IP_ADDRESS}
+  echo CURRENT_IP_ADDRESS: $CURRENT_IP_ADDRESS
+  az keyvault network-rule add -n $KEYVAULT_NAME_AKS_BASELINE --ip-address ${CURRENT_IP_ADDRESS}
 
 cat traefik-ingress-internal-aks-ingress-tls.crt traefik-ingress-internal-aks-ingress-tls.key > traefik-ingress-internal-aks-ingress-tls.pem
 az keyvault certificate import -f traefik-ingress-internal-aks-ingress-tls.pem -n traefik-ingress-internal-aks-ingress-tls --vault-name $KEYVAULT_NAME_AKS_BASELINE
@@ -219,8 +219,10 @@ kubectl wait -n a0008 --for=condition=ready pod --selector=app.kubernetes.io/nam
 
 # 10 - Deploy the workload (ASP.NET Core Docker web app)
 
+# for linux
 sed -i "s/contoso.com/${DOMAIN_NAME_AKS_BASELINE}/" workload/aspnetapp-ingress-patch.yaml
 
+# for MacOs
 sed -i '' 's/contoso.com/'"${DOMAIN_NAME_AKS_BASELINE}"'/g' workload/aspnetapp-ingress-patch.yaml
 
 kubectl apply -k workload/
