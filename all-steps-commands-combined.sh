@@ -147,6 +147,13 @@ echo AKS_CLUSTER_NAME: $AKS_CLUSTER_NAME
 
 az aks get-credentials -g rg-bu0001a0008 -n $AKS_CLUSTER_NAME
 
+
+# if you get the following error
+#
+# Error from server (Forbidden): nodes is forbidden: User "nouman.manan@MngEnvMCAP193478.onmicrosoft.com" cannot list resource "nodes" in API group "" at the cluster scope: User does not have access to the resource in Azure. Update role assignment to allow access.
+#
+# then grant RBAC "Azure Kubernetes Service RBAC Cluster Admin" role access to the user
+
 kubectl get nodes
 
 kubectl get namespaces
@@ -171,7 +178,7 @@ az keyvault certificate import -f traefik-ingress-internal-aks-ingress-tls.pem -
 kubectl get constrainttemplate
 
 # run the saveenv.sh script at any time to save environment variables created above to aks_baseline.env
-./saveenv.sh
+  ./saveenv.sh
 
 # if your terminal session gets reset, you can source the file to reload the environment variables
 # source aks_baseline.env
@@ -213,7 +220,7 @@ EOF
 # Import ingress controller image hosted in public container registries
 az acr import --source docker.io/library/traefik:v2.9.6 -n $ACR_NAME_AKS_BASELINE
 
-kubectl create -f https://raw.githubusercontent.com/mspnp/aks-baseline/main/workload/traefik.yaml
+  kubectl create -f https://raw.githubusercontent.com/mspnp/aks-baseline/main/workload/traefik.yaml
 
 kubectl wait -n a0008 --for=condition=ready pod --selector=app.kubernetes.io/name=traefik-ingress-ilb --timeout=90s
 
@@ -225,7 +232,7 @@ sed -i "s/contoso.com/${DOMAIN_NAME_AKS_BASELINE}/" workload/aspnetapp-ingress-p
 # for MacOs
 sed -i '' 's/contoso.com/'"${DOMAIN_NAME_AKS_BASELINE}"'/g' workload/aspnetapp-ingress-patch.yaml
 
-kubectl apply -k workload/
+  kubectl apply -k workload/
 
 kubectl wait -n a0008 --for=condition=ready pod --selector=app.kubernetes.io/name=aspnetapp --timeout=90s
 
@@ -265,6 +272,14 @@ spec:
             port:
               number: 80
 EOF
+
+# Create an entry in public DNS zone for the following FQDN pointing to Application Gateway IP by creating an A-Record in DNS.
+# bicycle.azcloudjedi.com
+
+# To test the entire deployment to AKS, go to the following URL
+https://bicycle.azcloudjedi.com/
+
+
 
 AzureDiagnostics
 | where ResourceProvider == "MICROSOFT.NETWORK" and Category == "ApplicationGatewayFirewallLog"
