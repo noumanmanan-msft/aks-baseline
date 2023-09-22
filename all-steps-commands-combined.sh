@@ -79,6 +79,7 @@ az group create -n rg-enterprise-networking-hubs -l centralus
 # [This takes less than one minute to run.]
 az group create -n rg-enterprise-networking-spokes -l centralus
 
+# [This takes around four minutes to run.]
 az deployment group create -g rg-enterprise-networking-hubs -f networking/hub-default.bicep -p location=eastus2
 
 RESOURCEID_VNET_HUB=$(az deployment group show -g rg-enterprise-networking-hubs -n hub-default --query properties.outputs.hubVnetId.value -o tsv)
@@ -153,11 +154,18 @@ az aks get-credentials -g rg-bu0001a0008 -n $AKS_CLUSTER_NAME
 # Error from server (Forbidden): nodes is forbidden: User "nouman.manan@MngEnvMCAP193478.onmicrosoft.com" cannot list resource "nodes" in API group "" at the cluster scope: User does not have access to the resource in Azure. Update role assignment to allow access.
 #
 # then grant RBAC "Azure Kubernetes Service RBAC Cluster Admin" role access to the user
+# this may take from few seconds to few minutes to take affect
 
 kubectl get nodes
 
 kubectl get namespaces
 kubectl get all -n cluster-baseline-settings
+
+
+kubectl apply -f cluster-manifests/a0008/ # run this twice
+kubectl apply -f cluster-manifests/a0008/
+
+
 
 # 08 - Workload prerequisites
 
@@ -220,8 +228,9 @@ EOF
 # Import ingress controller image hosted in public container registries
 az acr import --source docker.io/library/traefik:v2.9.6 -n $ACR_NAME_AKS_BASELINE
 
-  kubectl create -f https://raw.githubusercontent.com/mspnp/aks-baseline/main/workload/traefik.yaml
+kubectl create -f https://raw.githubusercontent.com/mspnp/aks-baseline/main/workload/traefik.yaml
 
+# the following command should give "condition met" response
 kubectl wait -n a0008 --for=condition=ready pod --selector=app.kubernetes.io/name=traefik-ingress-ilb --timeout=90s
 
 # 10 - Deploy the workload (ASP.NET Core Docker web app)
@@ -232,7 +241,7 @@ sed -i "s/contoso.com/${DOMAIN_NAME_AKS_BASELINE}/" workload/aspnetapp-ingress-p
 # for MacOs
 sed -i '' 's/contoso.com/'"${DOMAIN_NAME_AKS_BASELINE}"'/g' workload/aspnetapp-ingress-patch.yaml
 
-  kubectl apply -k workload/
+kubectl apply -k workload/
 
 kubectl wait -n a0008 --for=condition=ready pod --selector=app.kubernetes.io/name=aspnetapp --timeout=90s
 
